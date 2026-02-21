@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { exec } from "node:child_process";
-import { exists, existsSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { readdir } from "node:fs/promises";
 import Database from "better-sqlite3";
 import * as XMPP from "stanza";
@@ -47,7 +47,7 @@ ws.on("connection", (ws) => {
 exec(
 	existsSync("./venv")
 		? "./venv/bin/python src/bridge.py"
-		: "python src/bridge.py",
+		: "python3 src/bridge.py",
 	{
 		env: process.env,
 	},
