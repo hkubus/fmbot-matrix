@@ -7,6 +7,7 @@ import * as XMPP from "stanza";
 import type { Message } from "stanza/protocol";
 import { WebSocketServer } from "ws";
 
+// TODO: fix too long text, python bridge not working (?)
 if (
 	!process.env.TRANSPORT_WS ||
 	!process.env.TRANSPORT_BOSH ||
@@ -33,6 +34,7 @@ ws.on("connection", (ws) => {
 		const body: { type: string; id: string; body: string } = JSON.parse(
 			e.toString(),
 		);
+		console.log(body.body);
 		if (!messagesBot[body.id]) messagesWs[body.id] = body.body;
 		else {
 			const msg = messagesBot[body.id];
