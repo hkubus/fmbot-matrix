@@ -6,7 +6,7 @@ import type { Agent } from "stanza";
 import type { Message } from "stanza/protocol";
 import { reply } from "../index.ts";
 import { getRecentTracks } from "../lastfm.ts";
-import { findSize, isBright } from "../util.ts";
+import { cutText, findSize, isBright } from "../util.ts";
 
 export async function run(client: Agent, message: Message, db: Database) {
 	if (!message.from) return;
@@ -38,17 +38,17 @@ export async function run(client: Agent, message: Message, db: Database) {
 	ctx.roundRect(10, 10, 1004, 492, 20);
 	ctx.fill();
 	ctx.closePath();
-
-	const titleSize = findSize(ctx, tracks[0].title, 452);
+	const title = cutText(tracks[0].title, 25);
+	const titleSize = findSize(ctx, title, 452);
 	const center = Math.round((512 + titleSize - 120) / 2);
 
 	ctx.font = `extrabold ${titleSize} DejaVu Sans Mono`;
 	ctx.fillStyle = isBright(...dominantColor) ? "#000000bb" : "#ffffffbb";
-	ctx.fillText(tracks[0].title, 502, center);
+	ctx.fillText(title, 502, center);
 	ctx.font = "30px DejaVu Sans Mono";
-	ctx.fillText(`${tracks[0].album}`, 502, center + 85);
+	ctx.fillText(`${cutText(tracks[0].album, 25)}`, 502, center + 85);
 	ctx.font = "bold 30px DejaVu Sans Mono";
-	ctx.fillText(`${tracks[0].artist}`, 502, center + 45);
+	ctx.fillText(`${cutText(tracks[0].artist, 25)}`, 502, center + 45);
 	ctx.fillText(`Previous track`, 502, 392);
 	ctx.save();
 	ctx.beginPath();

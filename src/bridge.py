@@ -173,7 +173,6 @@ class OmemoEchoClient(ClientXMPP):
             if is_muc_reflection:
                 log.info(f"Ignoring reflected encrypted MUC message: {message['body']}")
                 return
-
             # Send decrypted message to websocket task if available
             payload = {
                 "type": "xmpp_message",
@@ -196,8 +195,10 @@ async def websocket_connect(send_queue: asyncio.Queue, recv_queue: asyncio.Queue
     while True:
         recv_task = None
         try:
+            await asyncio.sleep(10)
             async with connect("ws://localhost:8080") as ws:
-                log.info("Connected to ws://localhost:8080")
+                print('Connected to ws://localhost:8080')
+                # log.info("Connected to ws://localhost:8080")
 
                 async def recv_loop() -> None:
                     async for message in ws:

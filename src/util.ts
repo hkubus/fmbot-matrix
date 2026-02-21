@@ -24,3 +24,11 @@ export function isBright(r: number, g: number, b: number) {
 	);
 	return brightness > 127.5;
 }
+
+export function cutText(text: string, length: number) {
+	text = text.trim();
+	if (text.length <= length) return text;
+	if (text.split("(")[0].trim().length <= length)
+		return text.split("(")[0].trim();
+	return `${text.slice(0, length - 3)}...`;
+}

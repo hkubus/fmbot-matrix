@@ -62,6 +62,11 @@ client.on("session:started", async () => {
 	// @ts-expect-error It exists
 	client.joinRoom(process.env.XMPP_ROOM, "fmbot", {});
 });
+process.on("SIGINT", async () => {
+	// @ts-expect-error It exists
+	client.leaveRoom(process.env.XMPP_ROOM, "fmbot").then(() => process.exit(0));
+	// process.exit(0);
+});
 
 const messageHandle = (msg: Message) => {
 	// console.log(msg);
