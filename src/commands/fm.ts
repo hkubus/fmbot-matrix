@@ -12,14 +12,14 @@ export async function run(client: Agent, message: Message, db: Database) {
 	if (!message.from) return;
 	const [, nickname] = message.from.split("/");
 
-	const { lastfm } = db
+	const lastfm = db
 		.prepare("SELECT lastfm FROM users WHERE name = ?")
 		.get(nickname) as { lastfm: string };
 	if (!lastfm)
 		return reply(message, {
 			body: "you need to set your lastfm account with .setname <lastfm>",
 		});
-	const tracks = await getRecentTracks(lastfm, 2);
+	const tracks = await getRecentTracks(lastfm.lastfm, 2);
 	if (!tracks)
 		return reply(message, { body: "fmbot why you trying not to laugh" });
 
