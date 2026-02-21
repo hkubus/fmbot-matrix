@@ -137,7 +137,6 @@ class OmemoEchoClient(ClientXMPP):
         mtype = stanza["type"]
         if mtype not in { "chat", "normal", "groupchat" }:
             return
-
         is_muc_reflection = False
         if mtype == "groupchat":
             if xep_0045 is None:
@@ -165,7 +164,6 @@ class OmemoEchoClient(ClientXMPP):
             return
 
         try:
-            print(stanza)
             message, device_information = await xep_0384.decrypt_message(stanza)
             if not message["body"]:
                 return

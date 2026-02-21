@@ -1,6 +1,4 @@
 import "dotenv/config";
-import { exec } from "node:child_process";
-import { existsSync } from "node:fs";
 import { readdir } from "node:fs/promises";
 import Database from "better-sqlite3";
 import * as XMPP from "stanza";
@@ -34,7 +32,6 @@ ws.on("connection", (ws) => {
 		const body: { type: string; id: string; body: string } = JSON.parse(
 			e.toString(),
 		);
-		console.log(body.body);
 		if (!messagesBot[body.id]) messagesWs[body.id] = body.body;
 		else {
 			const msg = messagesBot[body.id];
@@ -45,18 +42,7 @@ ws.on("connection", (ws) => {
 	});
 	ws.on("error", console.error);
 });
-// python bridge for omemo Lol
-exec(
-	existsSync("./venv")
-		? "./venv/bin/python src/bridge.py"
-		: "python3 src/bridge.py",
-	{
-		env: process.env,
-	},
-	(e, stdout, stderr) => {
-		console.log({ e, stdout, stderr });
-	},
-);
+
 const db = new Database("db.sqlite3");
 db.prepare(
 	`CREATE TABLE IF NOT EXISTS users (name TEXT PRIMARY KEY, lastfm TEXT)`,
