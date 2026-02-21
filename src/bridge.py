@@ -20,6 +20,9 @@ from slixmpp.xmlstream.matcher import MatchXPath
 
 from slixmpp_omemo import TrustLevel, XEP_0384
 from websockets.asyncio.client import connect
+from dotenv import load_dotenv 
+
+load_dotenv()
 
 log = logging.getLogger(__name__)
 class StorageImpl(Storage):
