@@ -1,10 +1,13 @@
 import "dotenv/config";
 import { readdir } from "node:fs/promises";
 import Database from "better-sqlite3";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime.js";
 import * as XMPP from "stanza";
 import type { Message } from "stanza/protocol";
 import { WebSocketServer } from "ws";
 
+dayjs.extend(relativeTime);
 // TODO: fix too long text, python bridge not working (?)
 if (
 	!process.env.TRANSPORT_WS ||

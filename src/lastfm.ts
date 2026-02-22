@@ -1,5 +1,14 @@
 const apiKey = process.env.LAST_FM_KEY as string;
-
+export interface Track {
+	artist: string;
+	image: string;
+	album: string;
+	nowPlaying: boolean;
+	title: string;
+	url: string;
+	date: Date;
+	artistMbid: string;
+}
 export async function getUserInfo(name: string) {
 	const req = await fetch(
 		`http://ws.audioscrobbler.com/2.0/?method=user.getinfo&user=${name}&api_key=${apiKey}&format=json`,
@@ -19,23 +28,17 @@ export async function getRecentTracks(name: string, limit?: number) {
 		`https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${name}&api_key=${apiKey}${limit ? `&limit=${limit}` : ``}&format=json`,
 	);
 	if (req.status !== 200) return null;
-	const data: {
-		artist: string;
-		image: string;
-		album: string;
-		nowPlaying: boolean;
-		title: string;
-		url: string;
-		date: Date;
-		artistMbid: string;
-	}[] = [];
+	const data: Track[] = [];
 	const json = await req.json();
 	// biome-ignore lint/suspicious/noExplicitAny: b
 	json.recenttracks.track.forEach((e: any) => {
 		console.log(e.artist);
 		data.push({
 			artist: e.artist["#text"],
-			image: e.image[3]["#text"],
+			image:
+				e.image[3]["#text"] ||
+				e.image.at(-1)?.["#text"] ||
+				"https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png",
 			album: e.album["#text"],
 			nowPlaying: e["@attr"]?.nowplaying === "true",
 			title: e.name,

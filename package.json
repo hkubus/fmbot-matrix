@@ -21,6 +21,7 @@
 		"@delirius/color-thief-node": "^1.0.0",
 		"@napi-rs/canvas": "^0.1.93",
 		"better-sqlite3": "^12.6.2",
+		"dayjs": "^1.11.19",
 		"dotenv": "^17.3.1",
 		"stanza": "^12.21.1",
 		"ws": "^8.19.0"

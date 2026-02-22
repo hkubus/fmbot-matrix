@@ -32,3 +32,32 @@ export function cutText(text: string, length: number) {
 		return text.split("(")[0].trim();
 	return `${text.slice(0, length - 3)}...`;
 }
+
+export function splitText(text: string, maxLength = 25) {
+	const lines: string[] = [];
+	let currentLine = "";
+
+	for (const word of text.split(" ")) {
+		if (lines.length === 0 && (currentLine + word).length <= maxLength) {
+			currentLine += (currentLine ? " " : "") + word;
+		} else {
+			if (currentLine) lines.push(currentLine);
+			currentLine = word;
+		}
+	}
+
+	if (currentLine) lines.push(currentLine);
+	console.log(lines);
+	if (lines.length === 1) {
+		return [lines[0], ""];
+	}
+	lines[1] = lines.slice(1).join(" ");
+	if (lines.length === 2) {
+		return [
+			lines[0],
+			lines[1].length > maxLength ? `${lines[1].slice(0, maxLength - 3)}...` : lines[1],
+		];
+	}
+	console.log(lines);
+	return lines.slice(0, 2);
+}
