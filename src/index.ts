@@ -83,6 +83,11 @@ const messageHandle = (msg: Message) => {
 	if (nickname === "fmbot") return;
 
 	if (msg.delay?.timestamp.getTime()) return;
+	if (msg.body === "fmbot, ") {
+		const command = commands.get("help");
+		command.run(client, msg, db);
+		return;
+	}
 	if (!msg.body?.startsWith(".")) return;
 
 	const command = commands.get(msg.body.slice(1).split(" ")[0]);
