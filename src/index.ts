@@ -8,7 +8,6 @@ import type { Message } from "stanza/protocol";
 import { WebSocketServer } from "ws";
 
 dayjs.extend(relativeTime);
-// TODO: fix too long text, python bridge not working (?)
 if (
 	!process.env.TRANSPORT_WS ||
 	!process.env.TRANSPORT_BOSH ||
@@ -35,6 +34,11 @@ ws.on("connection", (ws) => {
 		const body: { type: string; id: string; body: string } = JSON.parse(
 			e.toString(),
 		);
+		if (!body.body.startsWith(".")) {
+			if (messagesBot[body.id]) delete messagesBot[body.id];
+			return;
+		}
+
 		if (!messagesBot[body.id]) messagesWs[body.id] = body.body;
 		else {
 			const msg = messagesBot[body.id];
@@ -54,7 +58,6 @@ db.prepare(
 const commands = new Map();
 const dir = await readdir(`${import.meta.dirname}/commands`);
 dir.forEach(async (e) => {
-	console.log(`${import.meta.dirname}/commands/${e}`);
 	const cmd = await import(`${import.meta.dirname}/commands/${e}`);
 	commands.set(e.split(".")[0], cmd);
 });
@@ -66,13 +69,15 @@ client.on("session:started", async () => {
 	client.joinRoom(process.env.XMPP_ROOM, "fmbot", {});
 });
 process.on("SIGINT", async () => {
-	// @ts-expect-error It exists
-	client.leaveRoom(process.env.XMPP_ROOM, "fmbot").then(() => process.exit(0));
+	client
+		// @ts-expect-error It exists
+		.leaveRoom(process.env.XMPP_ROOM, "fmbot")
+		.then(() => process.exit(0))
+		.catch(() => process.exit(0));
 	// process.exit(0);
 });
 
 const messageHandle = (msg: Message) => {
-	// console.log(msg);
 	if (!msg.from) return;
 	const [, nickname] = msg.from.split("/");
 	if (nickname === "fmbot") return;

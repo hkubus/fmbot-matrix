@@ -6,13 +6,11 @@ import { getUserInfo } from "../lastfm.ts";
 
 export async function run(_client: Client, message: Message, db: Database) {
 	if (!message.from) return;
-	const [channel, nickname] = message.from.split("/");
+	const [, nickname] = message.from.split("/");
 	const name = message.body?.slice("!setname".length + 1);
 	if (!name) return reply(message, { body: "provide a name" });
 	const user = await getUserInfo(name);
 	if (!user) return reply(message, { body: "invalid username lol!" });
-	console.log(user);
-	console.log(channel);
 	db.prepare(
 		"INSERT INTO users (name, lastfm) VALUES (?, ?) ON CONFLICT(name) DO UPDATE SET lastfm = excluded.lastfm",
 	).run(nickname, name);

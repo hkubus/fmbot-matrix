@@ -47,7 +47,6 @@ export function splitText(text: string, maxLength = 25) {
 	}
 
 	if (currentLine) lines.push(currentLine);
-	console.log(lines);
 	if (lines.length === 1) {
 		return [lines[0], ""];
 	}
@@ -58,6 +57,5 @@ export function splitText(text: string, maxLength = 25) {
 			lines[1].length > maxLength ? `${lines[1].slice(0, maxLength - 3)}...` : lines[1],
 		];
 	}
-	console.log(lines);
 	return lines.slice(0, 2);
 }

@@ -11,7 +11,6 @@ import { cutText, findSize, isBright, splitText } from "../util.ts";
 
 export async function run(client: Agent, message: Message, db: Database) {
 	if (!message.from) return;
-	console.log(message);
 	const [, nickname] = message.from.split("/");
 
 	const lastfm = db
@@ -19,11 +18,9 @@ export async function run(client: Agent, message: Message, db: Database) {
 		.get(nickname) as { lastfm: string };
 
 	const args = message.body?.split(" ").slice(1) || [];
-	console.log(args);
 	const user: { lastfm: string } = db
 		.prepare("SELECT lastfm FROM users WHERE name = ?")
 		.get(args[0]?.split(",")[0]) as { lastfm: string };
-	console.log(user);
 	if (!lastfm && !user)
 		return reply(message, {
 			body: "you need to set your lastfm account with .setname <lastfm>",
@@ -88,10 +85,8 @@ export async function run(client: Agent, message: Message, db: Database) {
 	ctx.roundRect(512, 412, 60, 60, 10);
 	ctx.save();
 	ctx.clip();
-	console.log(3);
 	const track =
 		(tracks[1].title === tracks[0].title ? tracks[2] : tracks[1]) || tracks[1];
-	console.log(track);
 	if (!track) return;
 	const secondCover = await loadImage(track.image);
 	ctx.drawImage(secondCover, 512, 412, 60, 60);
