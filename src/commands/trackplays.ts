@@ -1,16 +1,21 @@
-import type { Database } from "better-sqlite3";
-import type { Client } from "stanza";
-import type { Message } from "stanza/protocol";
-import { reply } from "../index.ts";
+import type { DatabaseSync } from "node:sqlite";
+import type {
+	MatrixClient,
+	MessageEvent,
+	MessageEventContent,
+} from "@vector-im/matrix-bot-sdk";
 import { getRecentTracks, getTrack, searchTrack } from "../lastfm.ts";
 
-export async function run(_client: Client, message: Message, db: Database) {
-	if (!message.from) return;
-	const [, nickname] = message.from.split("/");
-	const args = message.body?.split(" ").slice(1) || [];
+export async function run(
+	client: MatrixClient,
+	message: MessageEvent<MessageEventContent>,
+	roomId: string,
+	db: DatabaseSync,
+) {
+	const args = message.content?.body?.split(" ").slice(1) || [];
 	const lastfm = db
 		.prepare("SELECT lastfm FROM users WHERE name = ?")
-		.get(nickname) as { lastfm: string };
+		.get(message.sender) as { lastfm: string };
 
 	const track: { title: string; artist: string } = { title: "", artist: "" };
 
@@ -26,15 +31,29 @@ export async function run(_client: Client, message: Message, db: Database) {
 	const currentTrack: { title: string; artist: string }[] | null =
 		track.title !== "" ? [track] : await getRecentTracks(lastfm.lastfm, 1);
 	if (!currentTrack?.[0])
-		return reply(message, { body: "couldn't fetch recent tracks" });
+		return client.sendMessage(roomId, {
+			msgtype: "m.text",
+			body: "couldn't fetch recent tracks",
+		});
 	const trackInfo = await getTrack(
 		currentTrack[0].title,
 		currentTrack[0].artist,
 		lastfm.lastfm,
 	);
 
-	if (!trackInfo) return reply(message, { body: "couldn't fetch track info" });
-	reply(message, {
-		body: `${nickname} has listened to \`${trackInfo.artist} - ${trackInfo.title}\` ${trackInfo.plays === "1" ? "once" : `${trackInfo.plays} times`}`,
+	if (!trackInfo)
+		return client.sendMessage(roomId, {
+			msgtype: "m.text",
+			body: "couldn't fetch track info",
+		});
+	console.log(trackInfo);
+	client.sendMessage(roomId, {
+		msgtype: "m.text",
+		format: "org.matrix.custom.html",
+		body: `${message.sender} has listened to \`${trackInfo.artist} - ${trackInfo.title}\` ${trackInfo.plays === "1" ? "once" : `${trackInfo.plays} times`}`,
+		mentions: {
+			user_ids: [message.sender],
+		},
+		formatted_body: `<a href="https://matrix.to/#/${message.sender}">${message.sender.split(":")[0]}</a> has listened to \`${trackInfo.artist} - ${trackInfo.title}\` ${trackInfo.plays === "1" ? "once" : `${trackInfo.plays} times`}`,
 	});
 }

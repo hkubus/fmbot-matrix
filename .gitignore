@@ -1,4 +1,5 @@
 node_modules
 .env
 db.sqlite3
-venv
+crypto
+matrix.json

@@ -1,16 +1,21 @@
-import type { Database } from "better-sqlite3";
-import type { Client } from "stanza";
-import type { Message } from "stanza/protocol";
-import { reply } from "../index.ts";
+import type { DatabaseSync } from "node:sqlite";
+import type {
+	MatrixClient,
+	MessageEvent,
+	MessageEventContent,
+} from "@vector-im/matrix-bot-sdk";
 import { getArtist, getRecentTracks, searchArtist } from "../lastfm.ts";
 
-export async function run(_client: Client, message: Message, db: Database) {
-	if (!message.from) return;
-	const [, nickname] = message.from.split("/");
-	const args = message.body?.split(" ").slice(1) || [];
+export async function run(
+	client: MatrixClient,
+	message: MessageEvent<MessageEventContent>,
+	roomId: string,
+	db: DatabaseSync,
+) {
+	const args = message.content.body?.split(" ").slice(1) || [];
 	const lastfm = db
 		.prepare("SELECT lastfm FROM users WHERE name = ?")
-		.get(nickname) as { lastfm: string };
+		.get(message.sender) as { lastfm: string };
 
 	let artist = "";
 	if (args.length !== 0) {
@@ -21,13 +26,25 @@ export async function run(_client: Client, message: Message, db: Database) {
 	} else {
 		const lastTrack = await getRecentTracks(lastfm.lastfm, 1);
 		if (!lastTrack?.[0])
-			return reply(message, { body: "couldn't fetch recent tracks" });
+			return client.sendMessage(roomId, {
+				msgtype: "m.text",
+				body: "couldn't fetch recent tracks",
+			});
 		artist = lastTrack[0].artist;
 	}
 	const artistInfo = await getArtist(artist, lastfm.lastfm);
 	if (!artistInfo)
-		return reply(message, { body: "couldn't fetch artist info" });
-	reply(message, {
-		body: `${nickname} has listened to \`${artistInfo.name}\` ${artistInfo.plays === "1" ? "once" : `${artistInfo.plays} times`}`,
+		return client.sendMessage(roomId, {
+			msgtype: "m.text",
+			body: "couldn't fetch artist info",
+		});
+	client.sendMessage(roomId, {
+		msgtype: "m.text",
+		format: "org.matrix.custom.html",
+		body: `${message.sender} has listened to \`${artistInfo.name}\` ${artistInfo.plays === "1" ? "once" : `${artistInfo.plays} times`}`,
+		mentions: {
+			user_ids: [message.sender],
+		},
+		formatted_body: `<a href="https://matrix.to/#/${message.sender}">${message.sender.split(":")[0]}</a> has listened to \`${artistInfo.name}\` ${artistInfo.plays === "1" ? "once" : `${artistInfo.plays} times`}`,
 	});
 }
