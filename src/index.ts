@@ -23,6 +23,7 @@ const client = new sdk.MatrixClient(
 	storage,
 	crypto,
 );
+crypto.getDeviceId();
 
 sdk.AutojoinRoomsMixin.setupOnClient(client);
 const db = new DatabaseSync("db.sqlite3");
@@ -45,8 +46,6 @@ client.on(
 			sdk.MessageEventContent & { "m.mentions": { user_ids: string[] } }
 		>,
 	) => {
-		console.log(event.content);
-		console.log(event.content["m.mentions"]?.user_ids);
 		if (event.sender === (await client.getUserId())) return;
 		if (event.content?.msgtype !== "m.text") return;
 		const body = event.content?.body;

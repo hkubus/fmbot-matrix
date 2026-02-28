@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noExplicitAny: Annoying to solve */
 const apiKey = process.env.LAST_FM_KEY as string;
 export interface Track {
 	artist: string;
@@ -30,12 +31,10 @@ export async function getRecentTracks(name: string, limit?: number) {
 	if (req.status !== 200) return null;
 	const data: Track[] = [];
 	const json = await req.json();
-	// biome-ignore lint/suspicious/noExplicitAny: b
 	json.recenttracks.track.forEach((e: any) => {
 		data.push({
 			artist: e.artist["#text"],
 			image:
-				e.image[3]["#text"] ||
 				e.image.at(-1)?.["#text"] ||
 				"https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png",
 			album: e.album["#text"],
@@ -62,7 +61,6 @@ export async function getTrack(track: string, artist: string, user: string) {
 	return {
 		artist: e.artist.name,
 		image:
-			e.album?.image[3]["#text"] ||
 			e.album?.image.at(-1)?.["#text"] ||
 			"https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png",
 		album: e.album?.title,
@@ -99,7 +97,6 @@ export async function searchTrack(trackName: string): Promise<
 		title: e.name,
 		url: e.url,
 		image:
-			e.image[3]["#text"] ||
 			e.image.at(-1)?.["#text"] ||
 			"https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png",
 	}));
@@ -124,7 +121,6 @@ export async function searchArtist(artistName: string): Promise<
 		name: e.name,
 		url: e.url,
 		image:
-			e.image[3]["#text"] ||
 			e.image.at(-1)?.["#text"] ||
 			"https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png",
 	}));
@@ -143,7 +139,6 @@ export async function getArtist(artist: string, user: string) {
 	return {
 		name: e.name,
 		image:
-			e.image[3]["#text"] ||
 			e.image.at(-1)?.["#text"] ||
 			"https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png",
 		url: e.url,
@@ -173,7 +168,6 @@ export async function searchAlbum(albumName: string): Promise<
 		title: e.name,
 		url: e.url,
 		image:
-			e.image[3]["#text"] ||
 			e.image.at(-1)?.["#text"] ||
 			"https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png",
 	}));
@@ -192,7 +186,6 @@ export async function getAlbum(album: string, artist: string, user: string) {
 		artist: e.artist,
 		title: e.name,
 		image:
-			e.image[3]["#text"] ||
 			e.image.at(-1)?.["#text"] ||
 			"https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png",
 		url: e.url,

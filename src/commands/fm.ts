@@ -1,3 +1,4 @@
+import { profile, profileEnd } from "node:console";
 import type { DatabaseSync } from "node:sqlite";
 // @ts-expect-error
 import { getColor } from "@delirius/color-thief-node";
@@ -10,9 +11,13 @@ import type {
 import dayjs from "dayjs";
 import { getRecentTracks } from "../lastfm.ts";
 import { cutText, findSize, isBright, splitText } from "../util.ts";
+
+profile();
 export async function run(
 	client: MatrixClient,
-	message: MessageEvent<MessageEventContent>,
+	message: MessageEvent<
+		MessageEventContent & { "m.mentions"?: { user_ids?: string[] } }
+	>,
 	roomId: string,
 	db: DatabaseSync,
 ) {
@@ -21,13 +26,13 @@ export async function run(
 		.prepare("SELECT lastfm FROM users WHERE name = ?")
 		.get(name) as { lastfm: string };
 
-	const args = message.content.body?.split(" ").slice(1) || [];
-	const user: { lastfm: string } | null =
-		args.length === 0
-			? null
-			: (db
-					.prepare("SELECT lastfm FROM users WHERE name = ?")
-					.get(args[0]?.split(",")[0]) as { lastfm: string });
+	const mention = message.content?.["m.mentions"]?.user_ids?.[0];
+	console.log(message.content);
+	const user: { lastfm: string } | null = mention
+		? (db.prepare("SELECT lastfm FROM users WHERE name = ?").get(mention) as {
+				lastfm: string;
+			})
+		: null;
 	if (!lastfm && !user)
 		return client.sendMessage(roomId, {
 			msgtype: "m.text",
@@ -62,7 +67,7 @@ export async function run(
 	const titleSize = findSize(
 		ctx,
 		title[0].length > title[1].length ? title[0] : title[1],
-		904,
+		954,
 	);
 	const center = Math.round((1024 + titleSize - 240) / 2);
 	ctx.font = `extrabold ${titleSize} DejaVu Sans Mono`;
@@ -100,7 +105,8 @@ export async function run(
 	const track =
 		(tracks[1].title === tracks[0].title ? tracks[2] : tracks[1]) || tracks[1];
 	if (!track) return;
-	const secondCover = await loadImage(track.image);
+	const secondCover =
+		track.image === tracks[0].image ? coverImage : await loadImage(track.image);
 	ctx.drawImage(secondCover, 1024, 824, 120, 120);
 	ctx.restore();
 
@@ -140,4 +146,5 @@ export async function run(
 	// 	body: `${slot.download}`,
 	// 	links: [{ description: "img", url: slot.download }],
 	// });
+	profileEnd();
 }

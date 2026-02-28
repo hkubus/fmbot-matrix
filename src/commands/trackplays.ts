@@ -50,10 +50,10 @@ export async function run(
 	client.sendMessage(roomId, {
 		msgtype: "m.text",
 		format: "org.matrix.custom.html",
-		body: `${message.sender} has listened to \`${trackInfo.artist} - ${trackInfo.title}\` ${trackInfo.plays === "1" ? "once" : `${trackInfo.plays} times`}`,
+		body: `${message.sender} has listened to \`${trackInfo.artist} - ${trackInfo.title}\` ${trackInfo.plays === "1" ? "once" : `${trackInfo.plays || 0} times`}`,
 		mentions: {
 			user_ids: [message.sender],
 		},
-		formatted_body: `<a href="https://matrix.to/#/${message.sender}">${message.sender.split(":")[0]}</a> has listened to \`${trackInfo.artist} - ${trackInfo.title}\` ${trackInfo.plays === "1" ? "once" : `${trackInfo.plays} times`}`,
+		formatted_body: `<a href="https://matrix.to/#/${message.sender}">${message.sender.split(":")[0]}</a> has listened to \`${trackInfo.artist} - ${trackInfo.title}\` ${trackInfo.plays === "1" ? "once" : `${trackInfo.plays || 0} times`}`,
 	});
 }

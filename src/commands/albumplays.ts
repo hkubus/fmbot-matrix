@@ -44,22 +44,10 @@ export async function run(
 	client.sendMessage(roomId, {
 		msgtype: "m.text",
 		format: "org.matrix.custom.html",
-		body: `${message.sender} has listened to \`${albumInfo.title}\` by ${albumInfo.artist} ${albumInfo.plays === "1" ? "once" : `${albumInfo.plays} times`}`,
+		body: `${message.sender} has listened to \`${albumInfo.title}\` by ${albumInfo.artist} ${albumInfo.plays === "1" ? "once" : `${albumInfo.plays || 0} times`}`,
 		mentions: {
 			user_ids: [message.sender],
 		},
-		formatted_body: `<a href="https://matrix.to/#/${message.sender}">${message.sender.split(":")[0]}</a> has listened to \`${albumInfo.title}\` by ${albumInfo.artist} ${albumInfo.plays === "1" ? "once" : `${albumInfo.plays} times`}`,
+		formatted_body: `<a href="https://matrix.to/#/${message.sender}">${message.sender.split(":")[0]}</a> has listened to \`${albumInfo.title}\` by ${albumInfo.artist} ${albumInfo.plays === "1" ? "once" : `${albumInfo.plays || 0} times`}`,
 	});
-	// client.sendMessage(roomId, {
-	// 	msgtype: "m.text",
-	// 	formatted_body: `<a href="https://www.last.fm/user/${lastfm.lastfm}">${message.sender}</a> has listened to <a href="${albumInfo.url}">\`${albumInfo.artist} - ${albumInfo.title}\`</a> ${albumInfo.plays === "1" ? "once" : `${albumInfo.plays} times`}`,
-	// 	format: "org.matrix.custom.html",
-	// });
-	// client.sendMessage(roomId, {
-	// 	msgtype: "m.text",
-	// 	"m.mentions": [],
-	// 	body: `<a href="https://www.last.fm/user/${lastfm.lastfm}">hi</a>`,
-	// 	formatted_body: `<a href="https://www.last.fm/user/${lastfm.lastfm}">hi</a>`,
-	// 	format: "org.matrix.custom.html",
-	// });
 }
