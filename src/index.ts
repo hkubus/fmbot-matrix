@@ -50,8 +50,9 @@ client.on(
 		const body = event.content?.body;
 		if (body.startsWith(".")) {
 			const id = await client.getUserId();
-			event.content["m.mentions"].user_ids =
-				event.content["m.mentions"].user_ids?.filter((e) => e !== id) || [];
+			if (event.content?.["m.mentions"]?.user_ids)
+				event.content["m.mentions"].user_ids =
+					event.content["m.mentions"].user_ids?.filter((e) => e !== id) || [];
 			const commandName = body.slice(1).split(" ")[0];
 			const command = commands.get(commandName);
 			if (command) {
