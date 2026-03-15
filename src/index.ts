@@ -37,7 +37,6 @@ dir.forEach(async (e) => {
 	const cmd = await import(`${import.meta.dirname}/commands/${e}`);
 	commands.set(e.split(".")[0], cmd);
 });
-
 client.on(
 	"room.message",
 	async (
@@ -49,14 +48,10 @@ client.on(
 		if (event.sender === (await client.getUserId())) return;
 		if (event.content?.msgtype !== "m.text") return;
 		const body = event.content?.body;
-		if (
-			event.content["m.mentions"]?.user_ids?.includes(await client.getUserId())
-		) {
-			const command = commands.get("help");
-			command?.run(client, event, roomId, db);
-			return;
-		}
 		if (body.startsWith(".")) {
+			const id = await client.getUserId();
+			event.content["m.mentions"].user_ids =
+				event.content["m.mentions"].user_ids?.filter((e) => e !== id) || [];
 			const commandName = body.slice(1).split(" ")[0];
 			const command = commands.get(commandName);
 			if (command) {

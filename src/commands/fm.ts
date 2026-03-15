@@ -1,18 +1,20 @@
-import { profile, profileEnd } from "node:console";
 import type { DatabaseSync } from "node:sqlite";
 // @ts-expect-error
 import { getColor } from "@delirius/color-thief-node";
-import { Canvas, loadImage } from "@napi-rs/canvas";
+import { Canvas, GlobalFonts, loadImage } from "@napi-rs/canvas";
 import type {
 	MatrixClient,
 	MessageEvent,
 	MessageEventContent,
 } from "@vector-im/matrix-bot-sdk";
 import dayjs from "dayjs";
-import { getRecentTracks } from "../lastfm.ts";
+import { getAlbum, getArtist, getRecentTracks, getTrack } from "../lastfm.ts";
 import { cutText, findSize, isBright, splitText } from "../util.ts";
 
-profile();
+GlobalFonts.registerFromPath(
+	`${import.meta.dirname}/../../fonts/noncolor.ttf`,
+	"NotoEmoji",
+);
 export async function run(
 	client: MatrixClient,
 	message: MessageEvent<
@@ -22,40 +24,40 @@ export async function run(
 	db: DatabaseSync,
 ) {
 	const name = message.sender;
-	const lastfm = db
+	let { lastfm } = db
 		.prepare("SELECT lastfm FROM users WHERE name = ?")
 		.get(name) as { lastfm: string };
 
 	const mention = message.content?.["m.mentions"]?.user_ids?.[0];
-	console.log(message.content);
 	const user: { lastfm: string } | null = mention
 		? (db.prepare("SELECT lastfm FROM users WHERE name = ?").get(mention) as {
 				lastfm: string;
 			})
 		: null;
-	if (!lastfm && !user)
-		return client.sendMessage(roomId, {
-			msgtype: "m.text",
-			body: "you need to set your lastfm account with .setname <lastfm>",
-		});
-	let tracks = await getRecentTracks(user?.lastfm || lastfm.lastfm, 2);
-	if (!tracks) tracks = await getRecentTracks(lastfm.lastfm, 2);
+	if (!lastfm && !user?.lastfm)
+		return client.replyText(
+			roomId,
+			message.eventId,
+			"you need to set your lastfm account with .setname <lastfm>",
+		);
+	if (user?.lastfm) lastfm = user?.lastfm;
+	let tracks = await getRecentTracks(user?.lastfm || lastfm, 2);
+	if (!tracks) tracks = await getRecentTracks(lastfm, 2);
 	if (!tracks)
-		return client.sendMessage(roomId, {
-			msgtype: "m.text",
-			body: "couldn't fetch recent tracks",
-		});
+		return client.replyText(
+			roomId,
+			message.eventId,
+			"couldn't fetch recent tracks",
+		);
 
 	const coverImage = await loadImage(tracks[0].image);
 	const canvas = new Canvas(2048, 1024);
 	const ctx = canvas.getContext("2d");
-
 	const dominantColor = (await getColor(coverImage)) as unknown as [
 		number,
 		number,
 		number,
 	];
-
 	ctx.fillStyle = `#${dominantColor.map((e) => e.toString(16).padStart(2, "0")).join("")}`;
 	ctx.beginPath();
 	ctx.roundRect(20, 20, 2008, 984, 40);
@@ -67,11 +69,33 @@ export async function run(
 	const titleSize = findSize(
 		ctx,
 		title[0].length > title[1].length ? title[0] : title[1],
-		954,
+		950,
 	);
 	const center = Math.round((1024 + titleSize - 240) / 2);
-	ctx.font = `extrabold ${titleSize} DejaVu Sans Mono`;
+	const trackResults = await getTrack(
+		tracks[0].title,
+		tracks[0].artist,
+		lastfm,
+	);
+	const albumResults = await getAlbum(
+		tracks[0].album,
+		tracks[0].artist,
+		lastfm,
+	);
+	const artistResults = await getArtist(tracks[0].artist, lastfm);
+	// scrobbles
 	ctx.fillStyle = bright ? "#000000bb" : "#ffffffbb";
+	ctx.font = `bold 60px "NotoEmoji"`;
+	ctx.fillText(`🎶`, 1004, 150);
+	ctx.fillText(`💽`, 1004 + 332, 150);
+	ctx.fillText(`👤`, 1004 + 652, 150);
+	ctx.font = `bold 60px DejaVu Sans Mono`;
+	ctx.fillText(trackResults?.plays || 0, 1004 + 90, 150);
+	ctx.fillText(albumResults?.plays || 0, 1004 + 332 + 90, 150);
+	ctx.fillText(artistResults?.plays || 0, 1004 + 652 + 90, 150);
+	ctx.textAlign = "left";
+	// current track text
+	ctx.font = `extrabold ${titleSize} DejaVu Sans Mono`;
 	if (title[1]) {
 		ctx.fillText(title[0], 1004, center - titleSize);
 		ctx.fillText(title[1], 1004, center);
@@ -86,6 +110,7 @@ export async function run(
 	}
 	ctx.font = "bold 60px DejaVu Sans Mono";
 	ctx.fillText(`${cutText(tracks[0].artist, 25)}`, 1004, center + 90);
+	// second track
 	ctx.fillText(`Previous track`, 1004, 784);
 	ctx.save();
 	ctx.beginPath();
@@ -93,7 +118,6 @@ export async function run(
 	ctx.clip();
 	ctx.drawImage(coverImage, 60, 60, 904, 904);
 	ctx.restore();
-	// second track
 	ctx.beginPath();
 	ctx.roundRect(1004, 804, 984, 160, 40);
 	ctx.fillStyle = bright ? "#00000020" : "#ffffff20";
@@ -135,16 +159,4 @@ export async function run(
 			...encrypted.file,
 		},
 	});
-	// // @ts-expect-error
-	// const slot = await client.getUploadSlot(process.env.XMPP_UPLOAD_DOMAIN, {
-	// 	name: "img.png",
-	// 	size: blob.size,
-	// 	type: "request",
-	// });
-	// await fetch(slot.upload.url, { body: blob, method: "PUT" });
-	// reply(message, {
-	// 	body: `${slot.download}`,
-	// 	links: [{ description: "img", url: slot.download }],
-	// });
-	profileEnd();
 }
