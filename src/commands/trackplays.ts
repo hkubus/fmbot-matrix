@@ -16,13 +16,7 @@ export async function run(
 	const lastfm = db
 		.prepare("SELECT lastfm FROM users WHERE name = ?")
 		.get(message.sender) as { lastfm: string };
-	if (!lastfm.lastfm) {
-		return client.replyText(
-			roomId,
-			message.eventId,
-			"you need to set your username with .setname <name>",
-		);
-	}
+
 	const track: { title: string; artist: string } = { title: "", artist: "" };
 
 	if (args.length !== 0) {
@@ -37,11 +31,10 @@ export async function run(
 	const currentTrack: { title: string; artist: string }[] | null =
 		track.title !== "" ? [track] : await getRecentTracks(lastfm.lastfm, 1);
 	if (!currentTrack?.[0])
-		return client.replyText(
-			roomId,
-			message.eventId,
-			"couldn't fetch recent tracks",
-		);
+		return client.sendMessage(roomId, {
+			msgtype: "m.text",
+			body: "couldn't fetch recent tracks",
+		});
 	const trackInfo = await getTrack(
 		currentTrack[0].title,
 		currentTrack[0].artist,
@@ -49,15 +42,18 @@ export async function run(
 	);
 
 	if (!trackInfo)
-		return client.replyText(
-			roomId,
-			message.eventId,
-			"couldn't fetch track info",
-		);
-	client.replyText(
-		roomId,
-		message.eventId,
-		`${message.sender} has listened to \`${trackInfo.artist} - ${trackInfo.title}\` ${trackInfo.plays === "1" ? "once" : `${trackInfo.plays || 0} times`}`,
-		`<a href="https://matrix.to/#/${message.sender}">${message.sender.split(":")[0]}</a> has listened to \`${trackInfo.artist} - ${trackInfo.title}\` ${trackInfo.plays === "1" ? "once" : `${trackInfo.plays || 0} times`}`,
-	);
+		return client.sendMessage(roomId, {
+			msgtype: "m.text",
+			body: "couldn't fetch track info",
+		});
+	console.log(trackInfo);
+	client.sendMessage(roomId, {
+		msgtype: "m.text",
+		format: "org.matrix.custom.html",
+		body: `${message.sender} has listened to \`${trackInfo.artist} - ${trackInfo.title}\` ${trackInfo.plays === "1" ? "once" : `${trackInfo.plays || 0} times`}`,
+		mentions: {
+			user_ids: [message.sender],
+		},
+		formatted_body: `<a href="https://matrix.to/#/${message.sender}">${message.sender.split(":")[0]}</a> has listened to \`${trackInfo.artist} - ${trackInfo.title}\` ${trackInfo.plays === "1" ? "once" : `${trackInfo.plays || 0} times`}`,
+	});
 }
