@@ -16,9 +16,7 @@ export async function run(
 	_message: MessageEvent<MessageEventContent>,
 	roomId: string,
 ) {
-	client.replyText(
-		roomId,
-		_message.eventId,
-		`available commands:\n.${commands.join(", .")}\ncurrent commit: ${commit}`,
-	);
+	client.sendMessage(roomId, {
+		body: `available commands:\n.${commands.join(", .")}\ncurrent commit: ${commit}`,
+	});
 }

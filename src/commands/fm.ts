@@ -24,10 +24,10 @@ export async function run(
 	db: DatabaseSync,
 ) {
 	const name = message.sender;
-	let { lastfm } = db
+	const result = db
 		.prepare("SELECT lastfm FROM users WHERE name = ?")
 		.get(name) as { lastfm: string };
-
+	let lastfm = result?.lastfm;
 	const mention = message.content?.["m.mentions"]?.user_ids?.[0];
 	const user: { lastfm: string } | null = mention
 		? (db.prepare("SELECT lastfm FROM users WHERE name = ?").get(mention) as {
@@ -35,20 +35,17 @@ export async function run(
 			})
 		: null;
 	if (!lastfm && !user?.lastfm)
-		return client.replyText(
-			roomId,
-			message.eventId,
-			"you need to set your lastfm account with .setname <lastfm>",
-		);
+		return client.sendMessage(roomId, {
+			body: "you need to set your lastfm account with .setname <lastfm>",
+		});
+
 	if (user?.lastfm) lastfm = user?.lastfm;
 	let tracks = await getRecentTracks(user?.lastfm || lastfm, 2);
 	if (!tracks) tracks = await getRecentTracks(lastfm, 2);
 	if (!tracks)
-		return client.replyText(
-			roomId,
-			message.eventId,
-			"couldn't fetch recent tracks",
-		);
+		return client.sendMessage(roomId, {
+			body: "couldnt fetch recent tracks",
+		});
 
 	const coverImage = await loadImage(tracks[0].image);
 	const canvas = new Canvas(2048, 1024);
