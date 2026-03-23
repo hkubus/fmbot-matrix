@@ -34,9 +34,7 @@ export async function getRecentTracks(name: string, limit?: number) {
 	json.recenttracks.track.forEach((e: any) => {
 		data.push({
 			artist: e.artist["#text"],
-			image:
-				e.image.at(-1)?.["#text"] ||
-				"https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png",
+			image: e.image.at(-1)?.["#text"] || null,
 			album: e.album["#text"],
 			nowPlaying: e["@attr"]?.nowplaying === "true",
 			title: e.name,
