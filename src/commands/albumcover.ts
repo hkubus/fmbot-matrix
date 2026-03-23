@@ -38,10 +38,7 @@ export async function run(
 			body: "couldnt fetch recent tracks",
 		});
 
-	if (
-		tracks[0].image !==
-		"https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png" // default image used when none found
-	) {
+	if (tracks[0].image !== null) {
 		const albumimage = tracks[0].image.split("/").at(-1); // to get the full size image (without the /300x300/ in the url)
 		try {
 			const response = await fetch(
