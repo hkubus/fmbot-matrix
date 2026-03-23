@@ -34,9 +34,7 @@ export async function getRecentTracks(name: string, limit?: number) {
 	json.recenttracks.track.forEach((e: any) => {
 		data.push({
 			artist: e.artist["#text"],
-			image:
-				e.image.at(-1)?.["#text"] ||
-				"https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png",
+			image: e.image.at(-1)?.["#text"] || null,
 			album: e.album["#text"],
 			nowPlaying: e["@attr"]?.nowplaying === "true",
 			title: e.name,
@@ -60,9 +58,7 @@ export async function getTrack(track: string, artist: string, user: string) {
 	const e = json.track;
 	return {
 		artist: e.artist.name,
-		image:
-			e.album?.image.at(-1)?.["#text"] ||
-			"https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png",
+		image: e.album?.image.at(-1)?.["#text"] || null,
 		album: e.album?.title,
 		title: e.name,
 		url: e.url,
@@ -96,9 +92,7 @@ export async function searchTrack(trackName: string): Promise<
 		artist: e.artist,
 		title: e.name,
 		url: e.url,
-		image:
-			e.image.at(-1)?.["#text"] ||
-			"https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png",
+		image: e.image.at(-1)?.["#text"] || null,
 	}));
 }
 
@@ -120,9 +114,7 @@ export async function searchArtist(artistName: string): Promise<
 	return json.results.artistmatches.artist.map((e: any) => ({
 		name: e.name,
 		url: e.url,
-		image:
-			e.image.at(-1)?.["#text"] ||
-			"https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png",
+		image: e.image.at(-1)?.["#text"] || null,
 	}));
 }
 
@@ -138,9 +130,7 @@ export async function getArtist(artist: string, user: string) {
 	const e = json.artist;
 	return {
 		name: e.name,
-		image:
-			e.image.at(-1)?.["#text"] ||
-			"https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png",
+		image: e.image.at(-1)?.["#text"] || null,
 		url: e.url,
 		summary: e.bio?.summary || "",
 		plays: e.stats.userplaycount,
@@ -167,9 +157,7 @@ export async function searchAlbum(albumName: string): Promise<
 		artist: e.artist,
 		title: e.name,
 		url: e.url,
-		image:
-			e.image.at(-1)?.["#text"] ||
-			"https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png",
+		image: e.image.at(-1)?.["#text"] || null,
 	}));
 }
 export async function getAlbum(album: string, artist: string, user: string) {
@@ -185,9 +173,7 @@ export async function getAlbum(album: string, artist: string, user: string) {
 	return {
 		artist: e.artist,
 		title: e.name,
-		image:
-			e.image.at(-1)?.["#text"] ||
-			"https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png",
+		image: e.image.at(-1)?.["#text"] || null,
 		url: e.url,
 		summary: e.wiki?.summary || "",
 		plays: e.userplaycount,

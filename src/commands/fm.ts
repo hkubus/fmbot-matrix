@@ -35,20 +35,26 @@ export async function run(
 			})
 		: null;
 	if (!lastfm && !user?.lastfm)
-		return client.sendMessage(roomId, {
-			body: "you need to set your lastfm account with .setname <lastfm>",
-		});
-
+		return client.replyText(
+			roomId,
+			message.eventId,
+			"you need to set your lastfm account with .setname <lastfm>",
+		);
 	if (user?.lastfm) lastfm = user?.lastfm;
 	let tracks = await getRecentTracks(user?.lastfm || lastfm, 2);
 	if (!tracks) tracks = await getRecentTracks(lastfm, 2);
 	if (!tracks)
-		return client.sendMessage(roomId, {
-			body: "couldnt fetch recent tracks",
-			msgtype: "m.text",
-		});
+		return client.replyText(
+			roomId,
+			message.eventId,
+			"couldn't fetch recent tracks",
+		);
 
-	const coverImage = await loadImage(tracks[0].image);
+	const coverImage = await loadImage(
+		tracks[0].image === null
+			? "https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png"
+			: tracks[0].image,
+	);
 	const canvas = new Canvas(2048, 1024);
 	const ctx = canvas.getContext("2d");
 	const dominantColor = (await getColor(coverImage)) as unknown as [
@@ -128,7 +134,13 @@ export async function run(
 		(tracks[1].title === tracks[0].title ? tracks[2] : tracks[1]) || tracks[1];
 	if (!track) return;
 	const secondCover =
-		track.image === tracks[0].image ? coverImage : await loadImage(track.image);
+		track.image === tracks[0].image
+			? coverImage
+			: await loadImage(
+					track.image === null
+						? "https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png"
+						: track.image,
+				);
 	ctx.drawImage(secondCover, 1024, 824, 120, 120);
 	ctx.restore();
 
