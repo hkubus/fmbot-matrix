@@ -45,6 +45,7 @@ export async function run(
 	if (!tracks)
 		return client.sendMessage(roomId, {
 			body: "couldnt fetch recent tracks",
+			msgtype: "m.text",
 		});
 
 	const coverImage = await loadImage(tracks[0].image);
