@@ -24,10 +24,10 @@ export async function run(
 	db: DatabaseSync,
 ) {
 	const name = message.sender;
-	let { lastfm } = db
+	const result = db
 		.prepare("SELECT lastfm FROM users WHERE name = ?")
 		.get(name) as { lastfm: string };
-
+	let lastfm = result?.lastfm;
 	const mention = message.content?.["m.mentions"]?.user_ids?.[0];
 	const user: { lastfm: string } | null = mention
 		? (db.prepare("SELECT lastfm FROM users WHERE name = ?").get(mention) as {
