@@ -35,19 +35,17 @@ export async function run(
 			})
 		: null;
 	if (!lastfm && !user?.lastfm)
-		return client.replyText(
-			roomId,
-			message.eventId,
-			"you need to set your lastfm account with .setname <lastfm>",
-		);
+		return client.sendMessage(roomId, {
+			body: "couldnt fetch recent tracks",
+			msgtype: "m.text",
+		});
 	if (user?.lastfm) lastfm = user?.lastfm;
 	let tracks = await getRecentTracks(user?.lastfm || lastfm, 2);
 	if (!tracks) tracks = await getRecentTracks(lastfm, 2);
 	if (!tracks)
-		return client.replyText(
+		return client.sendMessage(
 			roomId,
-			message.eventId,
-			"couldn't fetch recent tracks",
+			{ msgtype: "m.text", body: "couldn't fetch recent tracks" },
 		);
 
 	const coverImage = await loadImage(
