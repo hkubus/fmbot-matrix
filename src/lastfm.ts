@@ -15,7 +15,7 @@ export async function getUserInfo(name: string) {
 		`http://ws.audioscrobbler.com/2.0/?method=user.getinfo&user=${name}&api_key=${apiKey}&format=json`,
 	);
 	if (req.status !== 200) return null;
-	const { user } = await req.json();
+	const { user } = (await req.json()) as any;
 	return {
 		name: user.name,
 		playcount: parseInt(user.playcount, 10),
@@ -28,9 +28,13 @@ export async function getRecentTracks(name: string, limit?: number) {
 	const req = await fetch(
 		`https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${name}&api_key=${apiKey}${limit ? `&limit=${limit}` : ``}&format=json`,
 	);
-	if (req.status !== 200) return null;
+
+	if (req.status !== 200) {
+		console.log(await req.json());
+		return null;
+	}
 	const data: Track[] = [];
-	const json = await req.json();
+	const json = (await req.json()) as any;
 	json.recenttracks.track.forEach((e: any) => {
 		data.push({
 			artist: e.artist["#text"],
@@ -52,8 +56,9 @@ export async function getTrack(track: string, artist: string, user: string) {
 			artist,
 		)}&track=${encodeURIComponent(track)}&user=${user}&format=json`,
 	);
+
 	if (req.status !== 200) return null;
-	const json = await req.json();
+	const json = (await req.json()) as any;
 	if (!json.track) return null;
 	const e = json.track;
 	return {
@@ -87,7 +92,7 @@ export async function searchTrack(trackName: string): Promise<
 		)}&artist=${encodeURIComponent(artist)}&api_key=${apiKey}&format=json`,
 	);
 	if (req.status !== 200) return null;
-	const json = await req.json();
+	const json = (await req.json()) as any;
 	return json.results.trackmatches.track.map((e: any) => ({
 		artist: e.artist,
 		title: e.name,
@@ -110,7 +115,7 @@ export async function searchArtist(artistName: string): Promise<
 		)}&api_key=${apiKey}&format=json`,
 	);
 	if (req.status !== 200) return null;
-	const json = await req.json();
+	const json = (await req.json()) as any;
 	return json.results.artistmatches.artist.map((e: any) => ({
 		name: e.name,
 		url: e.url,
@@ -125,7 +130,7 @@ export async function getArtist(artist: string, user: string) {
 		)}&user=${user}&format=json`,
 	);
 	if (req.status !== 200) return null;
-	const json = await req.json();
+	const json = (await req.json()) as any;
 	if (!json.artist) return null;
 	const e = json.artist;
 	return {
@@ -152,7 +157,7 @@ export async function searchAlbum(albumName: string): Promise<
 		)}&api_key=${apiKey}&format=json`,
 	);
 	if (req.status !== 200) return null;
-	const json = await req.json();
+	const json = (await req.json()) as any;
 	return json.results.albummatches.album.map((e: any) => ({
 		artist: e.artist,
 		title: e.name,
@@ -167,7 +172,7 @@ export async function getAlbum(album: string, artist: string, user: string) {
 		)}&album=${encodeURIComponent(album)}&user=${user}&format=json`,
 	);
 	if (req.status !== 200) return null;
-	const json = await req.json();
+	const json = (await req.json()) as any;
 	if (!json.album) return null;
 	const e = json.album;
 	return {

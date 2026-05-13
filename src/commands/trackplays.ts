@@ -16,7 +16,6 @@ export async function run(
 	const lastfm = db
 		.prepare("SELECT lastfm FROM users WHERE name = ?")
 		.get(message.sender) as { lastfm: string };
-
 	const track: { title: string; artist: string } = { title: "", artist: "" };
 
 	if (args.length !== 0) {

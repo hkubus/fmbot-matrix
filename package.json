@@ -5,6 +5,7 @@
 	"main": "src/index.ts",
 	"scripts": {
 		"start": "node --env-file .env src/index.ts",
+		"check": "tsc --noEmit",
 		"generateToken": "node --env-file .env accessToken.ts"
 	},
 	"keywords": [],
@@ -14,12 +15,13 @@
 	"packageManager": "pnpm@10.30.0",
 	"devDependencies": {
 		"@biomejs/biome": "2.4.2",
-		"@types/node": "^25.2.3"
+		"@types/node": "^25.7.0"
 	},
 	"dependencies": {
 		"@delirius/color-thief-node": "^1.0.0",
 		"@napi-rs/canvas": "^0.1.93",
 		"@vector-im/matrix-bot-sdk": "0.8.0-element.3",
-		"dayjs": "^1.11.19"
+		"dayjs": "^1.11.19",
+		"typescript": "^6.0.3"
 	}
 }
