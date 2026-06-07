@@ -13,7 +13,7 @@ export async function run(
 	roomId: string,
 	db: DatabaseSync,
 ) {
-	const args = message.content.body.split(" ");
+	const args = message.content.body.trim().split(" ");
 	const type = args.pop() || "";
 	if (!["artists", "tracks", "albums"].includes(type))
 		return client.sendMessage(roomId, {

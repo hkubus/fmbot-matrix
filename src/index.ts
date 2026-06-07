@@ -45,7 +45,6 @@ client.on(
 			sdk.MessageEventContent & { "m.mentions": { user_ids: string[] } }
 		>,
 	) => {
-		if (event.sender === "@amy:mtx.gaydeer.ovh") return;
 		if (event.sender === (await client.getUserId())) return;
 		if (event.content?.msgtype !== "m.text") return;
 		const body = event.content?.body;
