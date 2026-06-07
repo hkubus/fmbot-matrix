@@ -1,4 +1,3 @@
-/** biome-ignore-all lint/suspicious/noExplicitAny: Annoying to solve */
 const apiKey = process.env.LAST_FM_KEY as string;
 export interface Track {
 	artist: string;

@@ -1,13 +1,13 @@
 import type { DatabaseSync } from "node:sqlite";
 
-import { GlobalFonts, loadImage } from "@napi-rs/canvas";
+import { GlobalFonts } from "@napi-rs/canvas";
 import type {
 	MatrixClient,
 	MessageEvent,
 	MessageEventContent,
 } from "@vector-im/matrix-bot-sdk";
 import { getAlbum, getArtist, getRecentTracks, getTrack } from "../lastfm.ts";
-import { generateImage } from "../util.ts";
+import { generateImage, loadImageCached } from "../util.ts";
 
 GlobalFonts.registerFromPath(
 	`${import.meta.dirname}/../../fonts/noncolor.ttf`,
@@ -23,13 +23,16 @@ export async function run(
 ) {
 	const name = message.sender;
 	const result = db
-		.prepare("SELECT lastfm FROM users WHERE name = ?")
-		.get(name) as { lastfm: string };
+		.prepare("SELECT lastfm, style FROM users WHERE name = ?")
+		.get(name) as { lastfm: string; style: number };
 	let lastfm = result?.lastfm;
 	const mention = message.content?.["m.mentions"]?.user_ids?.[0];
-	const user: { lastfm: string } | null = mention
-		? (db.prepare("SELECT lastfm FROM users WHERE name = ?").get(mention) as {
+	const user: { lastfm: string; style: number } | null = mention
+		? (db
+				.prepare("SELECT lastfm, style FROM users WHERE name = ?")
+				.get(mention) as {
 				lastfm: string;
+				style: number;
 			})
 		: null;
 	if (!lastfm && !user?.lastfm)
@@ -37,7 +40,6 @@ export async function run(
 			body: "couldnt fetch recent tracks",
 			msgtype: "m.text",
 		});
-
 	if (user?.lastfm) lastfm = user?.lastfm;
 	let tracks = await getRecentTracks(user?.lastfm || lastfm, 2);
 	if (!tracks) tracks = await getRecentTracks(lastfm, 2);
@@ -46,7 +48,7 @@ export async function run(
 			msgtype: "m.text",
 			body: "couldn't fetch recent tracks",
 		});
-	const coverImage = await loadImage(
+	const coverImage = await loadImageCached(
 		tracks[0].image === null
 			? "https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png"
 			: tracks[0].image,
@@ -63,21 +65,21 @@ export async function run(
 	};
 
 	if (!trackTwo) return;
+
 	const secondCover =
 		trackTwo.image === tracks[0].image
 			? coverImage
-			: await loadImage(
-					trackTwo.image === null
-						? "https://lastfm.freetls.fastly.net/i/u/300x300/2a96cbd8b46e442fc41c2b86b821562f.png"
-						: trackTwo.image,
-				);
+			: await loadImageCached(trackTwo.image);
+
 	const buffer = await generateImage(
 		tracks[0],
 		scrobbles,
 		coverImage,
 		trackTwo,
 		secondCover,
+		result?.style,
 	);
+
 	const encrypted = await client.crypto.encryptMedia(buffer);
 	const mxc = await client.uploadContent(encrypted.buffer);
 	await client.sendMessage(roomId, {

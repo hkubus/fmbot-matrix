@@ -45,7 +45,6 @@ export async function run(
 			msgtype: "m.text",
 			body: "couldn't fetch track info",
 		});
-	console.log(trackInfo);
 	client.sendMessage(roomId, {
 		msgtype: "m.text",
 		format: "org.matrix.custom.html",

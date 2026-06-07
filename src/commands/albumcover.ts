@@ -62,7 +62,6 @@ export async function run(
 					...encrypted.file,
 				},
 			});
-			// biome-ignore lint/suspicious/noExplicitAny: error type must be any or unknown
 		} catch (error: any) {
 			if (error.message) {
 				client.sendMessage(roomId, {

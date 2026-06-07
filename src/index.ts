@@ -28,7 +28,7 @@ crypto.getDeviceId();
 sdk.AutojoinRoomsMixin.setupOnClient(client);
 const db = new DatabaseSync("db.sqlite3");
 db.prepare(
-	`CREATE TABLE IF NOT EXISTS users (name TEXT PRIMARY KEY, lastfm TEXT)`,
+	`CREATE TABLE IF NOT EXISTS users (name TEXT PRIMARY KEY, lastfm TEXT, style INTEGER DEFAULT 1)`,
 ).run();
 
 const commands = new Map();
@@ -45,6 +45,7 @@ client.on(
 			sdk.MessageEventContent & { "m.mentions": { user_ids: string[] } }
 		>,
 	) => {
+		if (event.sender === "@amy:mtx.gaydeer.ovh") return;
 		if (event.sender === (await client.getUserId())) return;
 		if (event.content?.msgtype !== "m.text") return;
 		const body = event.content?.body;
