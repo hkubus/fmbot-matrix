@@ -14,7 +14,7 @@ export async function run(
 	db: DatabaseSync,
 ) {
 	const args = message.content.body.trim().split(" ");
-	const type = args.pop() || "";
+	const type = args[1] || "";
 	if (!["artists", "tracks", "albums"].includes(type))
 		return client.sendMessage(roomId, {
 			msgtype: "m.text",
